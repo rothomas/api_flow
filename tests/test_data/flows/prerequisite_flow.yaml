@@ -1,0 +1,7 @@
+description: Prerequisite Flow
+steps:
+  prerequisite_step:
+    description: Prerequisite Step
+    url: http://localhost:{? server_port ?}/prerequisite
+    outputs:
+      id: $.id

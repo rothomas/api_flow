@@ -1,0 +1,14 @@
+description: A Series of POST Requests
+steps:
+  string_body:
+    method: POST
+    url: http://localhost:{? server_port ?}/string_body
+    body: '{ "this": "is a string" }'
+  structured_body:
+    method: POST
+    url: http://localhost:{? server_port ?}/structured_body
+    body:
+      this: is structured
+    wait_for_success:
+      delay: 0.1
+      attempt: 1

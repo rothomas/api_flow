@@ -1,0 +1,4 @@
+description: Profile Value Substitution
+steps:
+  substitute:
+    url: http://localhost:{? server_port ?}/{? foo ?}/{? bar ?}/{? baz ?}

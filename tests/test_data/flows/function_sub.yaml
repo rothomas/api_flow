@@ -1,0 +1,4 @@
+description: Function Substitution Test
+steps:
+  first:
+    url: http://localhost:{? server_port ?}/{? echo("EchoTest") ?}

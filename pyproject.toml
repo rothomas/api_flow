@@ -1,0 +1,18 @@
+[tool.pytest.ini_options]
+addopts = "-s -v --cov=api_flow --cov-report term-missing"
+log_cli = true
+log_cli_date_format = "%Y-%m-%dT%H:%M:%S"
+log_cli_format = "%(asctime)s %(levelname)s %(message)s"
+log_cli_level = "INFO"
+minversion = "6.2.5"
+testpaths = [
+    "tests",
+]
+
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel"
+]
+
+build-backend = "setuptools.build_meta"

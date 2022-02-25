@@ -1,0 +1,5 @@
+description: my single-dependency flow
+depends_on: something_else
+steps:
+  bogus:
+    url: https://test

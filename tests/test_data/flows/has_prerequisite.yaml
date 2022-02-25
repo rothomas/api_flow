@@ -1,0 +1,6 @@
+description: A Flow With a Prerequisite
+depends_on: prerequisite_flow
+steps:
+  dependency:
+    description: Dependent Step
+    url: http://localhost:{? server_port ?}/dependent/{? prerequisite_flow.prerequisite_step.id ?}
