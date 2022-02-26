@@ -112,3 +112,8 @@ class Flow(Context):
             step_name = self.flow_store.current_step.step_name
             print(f"Flow \"{flow_name}\" failed at step \"{step_name}\".")
         return self.succeeded
+
+    current_flow = property(lambda self: self.flow_store.current_flow)
+    current_step = property(lambda self: self.flow_store.current_step)
+    previous_flow = property(lambda self: self.flow_store.previous_flow)
+    previous_step = property(lambda self: self.flow_store.previous_step)

@@ -112,6 +112,11 @@ classDiagram
   Flow : flow_dependencies_succeeded -- bool|None have dependencies run and did they all succeed?
   Flow : flow_steps_succeeded -- bool|None have steps run and did they all succeed?
   Flow : succeeded -- bool has the flow executed successfully?
+  Flow :  --------- Accessors ----------
+  Flow : current_flow -- reference to the currently executing flow
+  Flow : previous_flow -- reference to the last executed flow
+  Flow : current_step -- reference to the currently executing step
+  Flow : previous_step -- reference to the last executed step
   Flow : execute() bool
   class Context
   class Step
