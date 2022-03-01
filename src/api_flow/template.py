@@ -3,6 +3,7 @@ import os
 import re
 from api_flow.functions import get_template_function
 from api_flow.config import Config
+from api_flow.complex_namespace import ComplexNamespace
 
 
 class Template:
@@ -74,6 +75,8 @@ class Template:
             return cls._interpolate_list(value, context)
         elif isinstance(value, dict):
             return cls._interpolate_dict(value, context)
+        elif isinstance(value, ComplexNamespace):
+            return cls._interpolate_dict(value.as_dict(), context)
         return value
 
     @classmethod
