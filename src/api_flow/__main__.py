@@ -14,7 +14,7 @@ parser.add_argument(
     type=str,
     help='basename of the YAML file containing a flow definition'
 )
-paths = parser.add_argument_group('data paths', 'Customize the data file locations for api-flow')
+paths = parser.add_argument_group('optional data paths', 'Customize the data file locations for api-flow')
 paths.add_argument(
     '--data-path',
     dest='data_path',

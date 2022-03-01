@@ -69,37 +69,45 @@ outputs:
 ```
 
 Note the `{? my_site_url ?}` in the `url` field. This is a substitution point for a variable
-extracted from context.
+extracted from context. Most likely in this example there would be a `my_site_url` key
+defined in a profile file.
 
+#### The body field
 The `body` field can be a string, or it can be, e.g., `template:my_cool_flow_body.json` to load
 a template file, or it can be structured YAML. If you use structured YAML, this content will be
-reformatted as JSON to form the request body.
+reformatted as JSON to form the request body. If you intend to send a non-JSON body, you _must_ use
+a template file.
 
+#### Retry configuration
 The `wait_for_success` field defines the `step_retry_config` for the step. The retry configuration
 has two fields:
-- `attempt`: the number of times to try a failing request
+- `attempt`: total number of times to try a request when failures are encountered
 - `delay`: seconds to pause in between request attempts. If provided this applies to every attempt,
 _including the first one_.
 
 You can specify both of these directly under a `wait_for_success` dict key. Alternately, simply
-doing `wait_for_success: true` in your definition will supply a default config (three attempts
+using `wait_for_success: true` in your definition will supply a default config (three attempts
 with five-second delay). Omitting the `wait_for_success` field results in a no-retry configuration
 (one attempt, zero delay).
 
+> **Caution:** a zero delay with a positive retry will spam retries of failing requests as fast as it can.
+
+#### Step outputs
 The `outputs` of the step are defined as a map of variable names to [JSONPath](https://jsonpath.com/)
 expressions, which are applied to the body of a JSON response to extract the value. These
 variables are assigned to the Step for later access, so that `my_cool_step.my_output_var` refers
 to the value extracted from the response body.
 
-> **Caution:** a zero delay with a positive retry will spam retries of failing requests as fast as it can. 
-
-The `execute()` method runs the flow (including all retries if applicable) and returns `True` if the
-final request attempt succeeded.
+#### Running the step
+The `execute()` method runs the step (including all retries if applicable) and returns `True` if the
+final request attempt succeeded. To reiterate, you typically will not call this directly. The `execute`
+method on Flow objects calls `execute` on each Step.
 
 ### Flows
 Flows are what you actually execute. They are loaded from YAML files and define a set of Steps to
 execute in sequence. Flows can also optionally declare a set of other prerequisite flows that supply
-step outputs the current flow depends on.
+step outputs the current flow depends on. The prerequisite mechanism is a way to split out and reuse
+common sub-flows required in multiple different flows, for example, logging in and getting a session ID.
 ```mermaid
 classDiagram
   class Flow
@@ -150,19 +158,27 @@ steps:
 Step items are assigned to their containing Flow using the simple name, so that in the example
 above, after the Flow is executed, `my_cool_flow.my_cool_step` will refer to that Step object.
 
-Calling `execute` on the flow first runs all prerequisites defined by the `depends_on` field, in order,
+Calling `execute` on the flow first runs all prerequisites defined by the `depends_on` field in order,
 then assuming those all succeed, runs the steps in the `steps` field in order. The flow succeeds if
 all dependencies and steps succeed.
 
-## Extracting Results
+## Extracting Results and Populating Templates
 As seen above, steps are accessible via their flows, and outputs are available via their steps,
 so if you construct and execute a flow (`flow = Flow('my_cool_flow')`, `flow.execute()`) then you
 will be able to access step attributes as `value = flow.my_cool_flow.my_cool_step.my_output_var`.
+This provides a straightforward way to use the flow object for automated testing of API responses.
+
+Prerequisite flows also inherit from the main flow that depends upon them, allowing them to access 
+profiles and other data.
 
 This is the same syntax you will use in template tags, except you will omit the `flow` root.
 In rendering a template substitution, the context is always the current step, which inherits values
-from the current flow, and then from the profiles. In templates for `my_second_step`, you can
-use `{? my_first_step.an_output ?}` to use values from previous steps in the flow.
+from the current flow, and then from the profiles, so that every step gets access to the full state
+of the request process. In templates for `my_second_step`, you can use `{? my_first_step.an_output ?}`
+to use values from previous steps in the flow.
+
+For convenience, api-flow also globally tracks `current_flow`, `previous_flow`, `current_step` and
+`previous_step`, all of which are available to use in template substitutions.
 
 Any prerequisite flows (specified by `depends_on`) are also available by name on the flow, so they can
 be accessed using `{? prerequisite_flow.prereq_step.output_value ?}`.
@@ -237,8 +253,9 @@ def my_custom_function(context, <...other args>):
 ```
 
 Functions must be extremely basic. Their arguments (if any) must be expressible as JSON primitives, and their return
-values must be convertible to `str`.  It is also not possible to perform any nested template substitution. This last
-limitation is mitigated somewhat by the fact that the current context is passed as the first parameter of the function.
+values must be convertible to `str`. Keyword args are not supported. It is also not possible to perform any nested
+template substitution when calling a function. This last limitation is mitigated somewhat by the fact that the 
+current context is passed as the first parameter of the function.
 
 The function path defaults to `<data_path>/functions` but can be overridden using `Config.function_path` or the
 `FUNCTION_PATH` environment variable.
@@ -297,3 +314,10 @@ During the run, request and response data will be output to the console for diag
 
 This example would load `my_body_template.json` from the templates directory, interpolate any variable substitutions 
 defined in `{?…?}` format, and then use that as the body of the request to `https://example.com/my_step`.
+
+## Running From CLI
+The package includes a command-line module, which you can run using `python -m api_flow`.
+This will be useful for executing automated API processes when you are not testing the
+results. The same configuration options are available in the CLI as using `execute`.
+
+Run `python -m api_flow -h` for details.
