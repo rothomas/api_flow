@@ -294,7 +294,8 @@ my_step:
 ```
 
 When the step is executed, `my-step-body.json` will be read in from the templates directory and substitutions will be
-performed on any `{? substitution_tags ?}` inside.
+performed on any `{? substitution_tags ?}` inside. The result will be returned as
+the `body` value.
 
 ## Running Flows
 It is possible to construct an instance of the `Flow` class exported from api-flow directly, but it is easier to use
@@ -311,9 +312,6 @@ run `my_cool_flow` with the `my_environment` profile and return the constructed 
 you can then use to extract the outputs for further use.
 
 During the run, request and response data will be output to the console for diagnostic purposes.
-
-This example would load `my_body_template.json` from the templates directory, interpolate any variable substitutions 
-defined in `{?…?}` format, and then use that as the body of the request to `https://example.com/my_step`.
 
 ## Running From CLI
 The package includes a command-line module, which you can run using `python -m api_flow`.
