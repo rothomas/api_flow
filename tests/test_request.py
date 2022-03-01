@@ -1,6 +1,7 @@
 import json
 import pytest
 from unittest.mock import MagicMock, patch
+from api_flow.complex_namespace import ComplexNamespace
 from api_flow.request import Request, DEFAULT_HEADERS
 
 
@@ -116,6 +117,21 @@ class TestRequest:
         assert not request.response_succeeded
         assert request.execute()
         assert request.request_executed
+        assert request.response_succeeded
+        mock_requests_post.assert_called_with(
+            'https://test',
+            headers={
+                **DEFAULT_HEADERS,
+                'Accept': 'application/pdf',
+            },
+            json={'a': 'A'}
+        )
+
+    def test_post_request_with_complex_namespace_body(self, mock_step, mock_successful_response, mock_requests_post):
+        request = Request(mock_step)
+        mock_step.step_method = 'POST'
+        mock_step.step_body = ComplexNamespace(a='A')
+        assert request.execute()
         assert request.response_succeeded
         mock_requests_post.assert_called_with(
             'https://test',
